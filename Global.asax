@@ -43,7 +43,8 @@
             }
         }
         else if (Request.Path.ToLower().StartsWith("/service/")
-            || Request.Path.ToLower().StartsWith("/Layar/ccc.aspx"))
+            || Request.Path.ToLower().StartsWith("/layar/ccc.aspx")
+            || Request.Path.ToLower().StartsWith("/checkCCC/ccccheck"))
         {
             string txt = "";
             var newUrl = url + Request.RawUrl;
@@ -68,7 +69,7 @@
         }
         else
         {
-            Response.Redirect(url + Request.RawUrl);
+            Response.RedirectPermanent(url + Request.RawUrl);
         }
     }
 
