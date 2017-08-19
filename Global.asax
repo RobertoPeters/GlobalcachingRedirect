@@ -46,23 +46,57 @@
             || Request.Path.ToLower().StartsWith("/layar/ccc.aspx")
             || Request.Path.ToLower().StartsWith("/checkCCC/ccccheck"))
         {
-            string txt = "";
-            var newUrl = url + Request.RawUrl;
-            var wr = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(newUrl);
-            wr.KeepAlive = false;
-            wr.PreAuthenticate = true;
-            wr.Headers.Set("Pragma", "no-cache");
-            wr.ContentType = "text/text";
-            wr.Method = "GET";
-            wr.Headers.Add("Translate", "t");
-            wr.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; InfoPath.1)";
-            var resp = (System.Net.HttpWebResponse)wr.GetResponse();
-            using (var str = resp.GetResponseStream())
+            if (Request.Path.ToLower().Contains("cachedistance.aspx")
+                || Request.Path.ToLower().Contains("archived.aspx"))
             {
-                using (var reader = new System.IO.StreamReader(str))
+                Response.ContentType = "application/zip";
+                if (Request.Path.ToLower().Contains("cachedistance.aspx"))
                 {
-                    txt = reader.ReadToEnd();
-                    Response.Write(txt);
+                    Response.AppendHeader("content-disposition", "attachment;filename=CacheDistance.zip");
+                }
+                else if (Request.Path.ToLower().Contains("archived.aspx"))
+                {
+                    Response.AppendHeader("content-disposition", "attachment;filename=Archived.zip");
+                }                
+                var newUrl = url + Request.RawUrl;
+                var wr = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(newUrl);
+                wr.KeepAlive = false;
+                wr.PreAuthenticate = true;
+                wr.Method = "GET";
+                wr.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; InfoPath.1)";
+                var resp = (System.Net.HttpWebResponse)wr.GetResponse();
+                using (var str = resp.GetResponseStream())
+                {
+                    var buffer = new byte[1 * 1024 * 1024];
+                    var read = str.Read(buffer, 0, buffer.Length);
+                    while (read > 0)
+                    {
+                        Response.OutputStream.Write(buffer, 0, read);
+                        read = str.Read(buffer, 0, buffer.Length);
+                    }
+                }
+                Response.End();
+            }
+            else {
+                Response.ContentType = "text/html";
+                string txt = "";
+                var newUrl = url + Request.RawUrl;
+                var wr = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(newUrl);
+                wr.KeepAlive = false;
+                wr.PreAuthenticate = true;
+                wr.Headers.Set("Pragma", "no-cache");
+                wr.ContentType = "text/html";
+                wr.Method = "GET";
+                wr.Headers.Add("Translate", "t");
+                wr.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; InfoPath.1)";
+                var resp = (System.Net.HttpWebResponse)wr.GetResponse();
+                using (var str = resp.GetResponseStream())
+                {
+                    using (var reader = new System.IO.StreamReader(str))
+                    {
+                        txt = reader.ReadToEnd();
+                        Response.Write(txt);
+                    }
                 }
             }
             Response.End();
